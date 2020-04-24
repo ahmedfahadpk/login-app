@@ -3,53 +3,56 @@ const app = express();
 const PORT = 8888;
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const session = require('express-session'); // <<<
+const passport = require('passport'); // <<<
+const LocalStrategy = require('passport-local').Strategy; // <<<
+const User = require('./api/models/user-model');
+const apiRoutes = require('./api/routes/api-routes');
 
 app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(session({ secret: 'cats' })); // <<<
+app.use(passport.initialize()); // <<<
+app.use(passport.session()); // <<<
 
 mongoose.connect('mongodb://localhost:27017/login-test');
 
 const db = mongoose.connection;
-db.on('error', (err) => { console.log(`An error has occured while connecting to DB: $(err)`); });
+db.on('error', (err) => { console.log(`An error has occcured while connecting to DB: ${err}`); });
 db.on('open', () => { console.log(`Connected to database. `); });
 
-const Schema = mongoose.Schema;
-const userSchema = new Schema({
-    firstname: String,
-    lastname: String,
-    username: String,
-    password: String,
-    phone: Number
+function authenticateUser(username, password, done) {
+    User.findOne({ username: username }, (err, record) => {
+        if (err) {
+            return done(err);
+        }
+
+        if (!record) {
+            return done(null, false, { message: 'Incorrect username. ' });
+        }
+
+        if (record.password !== password) {
+            return done(null, false, { message: 'Incorrect password. ' });
+        }
+
+        return done(null, record);
+    });
+}
+
+passport.use(new LocalStrategy(authenticateUser));
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
 });
 
-const User = mongoose.model('User', userSchema);
-
-// only logged in user should be able to reach this endpoint
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/api/views/pages/home.html');
+passport.deserializeUser((id, done) => {
+    User.findById(id, (err, record) => {
+        if (err) { done(err); }
+        if (record) { done(null, record); }
+    });
 });
 
-app.get('/login', (req, res) => {
-    res.sendFile(__dirname + '/api/views/pages/login.html');
-});
-
-app.post('/login/send', (req, res) => {
-    //Add logic to authenticate user
-});
-
-app.get('/register', (req, res) => {
-    res.sendFile(__dirname + '/api/views/pages/register.html');
-});
-
-app.post('/register/send', (req, res) => {
-    let newUser = new User();
-    newUser.firstname = req.body.firstName;
-    newUser.lastname = req.body.lastName;
-    newUser.username = req.body.username;
-    newUser.password = req.body.password;
-    newUser.phone = req.body.phone;
-
-    console.log(newUser);
-});
+app.use('/', apiRoutes);
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
