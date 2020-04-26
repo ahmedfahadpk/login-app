@@ -6,6 +6,9 @@ module.exports = (mongoose) => {
     console.log(`An error has occcured while connecting to DB: ${err}`);
   });
   db.on("open", () => {
-    console.log(`Connected to database. `);
+    console.log(`Connected to DataBase. `);
   });
 };
+
+
+// "C:\Program Files\MongoDB\Server\4.2\bin\mongo.exe"

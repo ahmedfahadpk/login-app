@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const scoreSchema = new Schema({
     username: String,
-    Score: Number
+    score: Number
 });
 
 scoreSchema.plugin(findOrCreate);

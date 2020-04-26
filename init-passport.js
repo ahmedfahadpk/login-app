@@ -1,4 +1,4 @@
-const User = require('./api/models/user-model').User;
+const User = require('./api/models/user-model');
 const LocalStrategy = require('passport-local').Strategy;
 
 module.exports = (passport) => {
