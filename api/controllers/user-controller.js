@@ -1,4 +1,5 @@
 const User = require('../models/user-model');
+const Score = require('../models/score-model');
 
 module.exports.test = (req, res) => {
     res.json({
@@ -7,11 +8,19 @@ module.exports.test = (req, res) => {
 };
 
 module.exports.home = (req, res) => {
-    res.sendFile(__dirname + '/api/views/pages/home.html');
+    Score.find({}, (err, records) => {
+        if (err) { console.log('Error encountered when fetching score from DB. '); }
+        if (records.length === 0) { console.log('There is no record of score found from DB. '); }
+
+        res.render('pages/home', {
+            firstname: req.user.firstname,
+            scores: records
+        });
+    });
 };
 
 module.exports.login = (req, res) => {
-    res.sendFile(__dirname + '/api/views/pages/login.html');
+    res.render('pages/login');
 };
 
 
@@ -20,8 +29,8 @@ module.exports.logout = (req, res) => {
     res.redirect('/login');
 };
 
-module.exports.register = redirectLoginUser, (req, res) => {
-    res.sendFile(__dirname + '/api/views/pages/register.html');
+module.exports.register = (req, res) => {
+    res.render('pages/register');
 };
 
 module.exports.sendRegister = (req, res) => {

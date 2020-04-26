@@ -1,4 +1,4 @@
-module.exports.loginUser(req, res, next){
+module.exports.loginUser = (req, res, next) => {
     if (req.isAuthenticated()){
         res.redirect('/');
     } else {
@@ -6,7 +6,7 @@ module.exports.loginUser(req, res, next){
     }
 }
 
-module.exports.nonLoginUser(req, res, next){
+module.exports.nonLoginUser = (req, res, next) => {
     if (req.isUnauthenticated()){
         res.redirect('/login');
     } else {
